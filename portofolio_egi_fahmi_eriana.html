@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Egi Fahmi Eriana | Portfolio</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            500: '#06b6d4', // Cyan 500
+                            600: '#0891b2', // Cyan 600
+                            700: '#8b5cf6', // Violet 500
+                        }
+                    },
+                    animation: {
+                        'gradient-x': 'gradient-x 3s ease infinite',
+                    },
+                    keyframes: {
+                        'gradient-x': {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Styles & Glassmorphism */
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tilt-card {
+            transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .tilt-card:hover {
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.3), 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+        
+        .tilt-content {
+            transform: translateZ(30px);
+        }
+
+        /* Scroll Reveal Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Typing cursor */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s step-start infinite;
+            color: #06b6d4;
+        }
+        
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300">
+
+    <!-- Three.js Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50 glass rounded-full transition-all duration-300 border border-white/10 shadow-2xl" id="navbar">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 font-extrabold text-3xl tracking-tighter bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent flex items-center gap-3 cursor-pointer transition-transform hover:scale-105">
+                    EF <span class="text-sm font-medium text-slate-200 hidden sm:block tracking-normal mt-1">Egi Fahmi Eriana</span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden lg:block flex-1">
+                    <div class="flex items-center justify-center space-x-6">
+                        <a href="#about" class="hover:text-cyan-400 text-slate-200 text-sm font-medium transition-colors" data-i18n="nav_about">Tentang</a>
+                        <a href="#projects" class="hover:text-cyan-400 text-slate-200 text-sm font-medium transition-colors" data-i18n="nav_projects">Proyek</a>
+                        <a href="#gallery" class="hover:text-cyan-400 text-slate-200 text-sm font-medium transition-colors" data-i18n="nav_gallery">Galeri</a>
+                        <a href="#certificates" class="hover:text-cyan-400 text-slate-200 text-sm font-medium transition-colors" data-i18n="nav_certificates">Sertifikat</a>
+                        <a href="#contact" class="hover:text-cyan-400 text-slate-200 text-sm font-medium transition-colors" data-i18n="nav_contact">Kontak</a>
+                    </div>
+                </div>
+
+                <!-- Controls: Theme & Lang -->
+                <div class="flex items-center space-x-2 bg-slate-800/50 rounded-full p-1 border border-white/5">
+                    <button id="lang-toggle" class="px-3 py-1 rounded-full hover:bg-slate-700 transition-colors font-semibold text-xs text-slate-200">
+                        ID/EN
+                    </button>
+                    <div class="w-[1px] h-4 bg-white/20"></div>
+                    <button id="theme-toggle" class="p-1.5 rounded-full hover:bg-slate-700 transition-colors text-slate-200">
+                        <i class="fas fa-moon dark:hidden text-xs"></i>
+                        <i class="fas fa-sun hidden dark:block text-xs"></i>
+                    </button>
+                    
+                    <!-- Mobile menu button -->
+                    <div class="lg:hidden flex items-center ml-2">
+                        <button id="mobile-menu-btn" class="p-2 rounded-full hover:bg-slate-700 text-slate-200 focus:outline-none">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="lg:hidden hidden bg-slate-900/95 backdrop-blur-xl rounded-2xl mt-2 border border-white/10 overflow-hidden" id="mobile-menu">
+            <div class="px-4 py-4 space-y-2">
+                <a href="#about" class="block hover:text-cyan-400 px-3 py-2 rounded-md text-base font-medium text-slate-200" data-i18n="nav_about">Tentang</a>
+                <a href="#projects" class="block hover:text-cyan-400 px-3 py-2 rounded-md text-base font-medium text-slate-200" data-i18n="nav_projects">Proyek</a>
+                <a href="#gallery" class="block hover:text-cyan-400 px-3 py-2 rounded-md text-base font-medium text-slate-200" data-i18n="nav_gallery">Galeri</a>
+                <a href="#certificates" class="block hover:text-cyan-400 px-3 py-2 rounded-md text-base font-medium text-slate-200" data-i18n="nav_certificates">Sertifikat</a>
+                <a href="#contact" class="block hover:text-cyan-400 px-3 py-2 rounded-md text-base font-medium text-slate-200" data-i18n="nav_contact">Kontak</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center justify-center pt-20 reveal overflow-hidden relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12 lg:gap-24 w-full">
+            
+            <!-- Text Content -->
+            <div class="flex-1 text-left z-10 w-full mt-10 md:mt-0">
+                <h1 class="text-6xl sm:text-7xl lg:text-[5.5rem] font-extrabold mb-4 bg-gradient-to-r from-cyan-300 via-purple-300 to-purple-400 bg-clip-text text-transparent leading-[1.1] tracking-tight">
+                    Egi Fahmi<br>Eriana
+                </h1>
+                
+                <h3 class="text-xl sm:text-2xl font-bold text-white mb-5 leading-snug" data-i18n="hero_role">
+                    Frontend Developer | UI/UX Designer |<br class="hidden lg:block">
+                    Network Operating Center
+                </h3>
+                
+                <p class="text-slate-400 text-sm sm:text-base max-w-md mb-8 leading-relaxed font-medium" data-i18n="hero_bio">
+                    Mahasiswa tingkat akhir yang bersemangat membangun solusi web interaktif dan desain yang user-friendly
+                </p>
+                
+                <div class="flex gap-4">
+                    <!-- Glow Button -->
+                    <a href="#contact" class="group relative inline-flex items-center justify-center p-[1.5px] rounded-xl overflow-hidden font-medium transition-all hover:scale-105" data-i18n="btn_contact_wrap">
+                        <span class="absolute inset-0 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl"></span>
+                        <span class="relative px-6 py-2.5 bg-[#0f172a] rounded-xl text-slate-200 text-sm sm:text-base transition-all group-hover:bg-opacity-0">
+                            <span data-i18n="btn_contact">Hubungi Saya</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Profile Image (3D Tilt Card matching reference) -->
+            <div class="flex-1 flex justify-center lg:justify-end z-10 perspective-1000 w-full">
+                <!-- Glowing Border Wrapper -->
+                <div class="relative p-[2px] rounded-[2.5rem] bg-gradient-to-br from-cyan-400 via-slate-800/50 to-purple-600 shadow-[0_0_50px_rgba(6,182,212,0.15)]">
+                    <!-- Glass Inner Card -->
+                    <div class="tilt-card relative w-[280px] h-[280px] sm:w-[350px] sm:h-[350px] rounded-[2.4rem] bg-[#0f172a]/60 backdrop-blur-xl flex items-center justify-center border border-white/5 overflow-hidden">
+                        
+                        <!-- Circular Cutout for Image -->
+                        <div class="w-[200px] h-[200px] sm:w-[260px] sm:h-[260px] rounded-full overflow-hidden border-2 border-slate-700/50 shadow-2xl tilt-content relative z-20">
+                            <img src="IMG_20230528_015741_867.jpg" alt="Egi Fahmi Eriana" class="w-full h-full object-cover object-center scale-105">
+                        </div>
+                        
+                        <!-- Subtle background glow inside the card -->
+                        <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/10 to-purple-500/10 rounded-[2.4rem]"></div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- About & Skills Section -->
+    <section id="about" class="py-20 relative z-10 glass my-10 mx-4 sm:mx-auto max-w-7xl rounded-3xl reveal">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4" data-i18n="about_title">Tentang & Keahlian</h2>
+                <div class="w-16 h-1 bg-brand-500 mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- Tech Stack -->
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6 flex items-center gap-2"><i class="fas fa-laptop-code text-brand-500"></i> <span data-i18n="skills_title">Tech Stack / Keahlian</span></h3>
+                    <div class="flex flex-wrap gap-3">
+                        <!-- Skill Tags -->
+                        <span class="px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 font-medium">HTML5 & CSS3</span>
+                        <span class="px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 font-medium">Tailwind CSS</span>
+                        <span class="px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 font-medium">React.js</span>
+                        <span class="px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 font-medium">JavaScript (ES6+)</span>
+                        <span class="px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 font-medium">Figma (UI/UX)</span>
+                        <span class="px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 font-medium">Python</span>
+                        <span class="px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 font-medium">Networking (NOC)</span>
+                        <span class="px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 font-medium">Git & GitHub</span>
+                        <span class="px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 font-medium">Laravel</span>
+                        <span class="px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 font-medium">Typescript</span>
+                        <span class="px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 font-medium">Adobe XD</span>
+                        <span class="px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 font-medium">Figma</span>
+                    </div>
+                </div>
+
+                <!-- Experience -->
+                <div id="certificates" class="scroll-mt-24">
+                    <h3 class="text-2xl font-semibold mb-6 flex items-center gap-2"><i class="fas fa-briefcase text-brand-500"></i> <span data-i18n="exp_title">Pengalaman & Sertifikasi</span></h3>
+                    <div class="space-y-6">
+                        <!-- Experience Items (Adjust based on real data) -->
+                        <div class="border-l-2 border-brand-500 pl-4 relative">
+                            <div class="absolute w-3 h-3 bg-brand-500 rounded-full -left-[7px] top-2"></div>
+                            <h4 class="font-bold text-lg">Network Operating Center (NOC)</h4>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">2023 - Present</p>
+                            <p class="mt-2 text-slate-600 dark:text-slate-300" data-i18n="exp_noc_desc">Monitoring jaringan dan infrastruktur, troubleshooting, serta memastikan konektivitas berjalan optimal.</p>
+                        </div>
+                        <div class="border-l-2 border-brand-500 pl-4 relative">
+                            <div class="absolute w-3 h-3 bg-brand-500 rounded-full -left-[7px] top-2"></div>
+                            <h4 class="font-bold text-lg">UI/UX Design Bootcamp</h4>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">2023</p>
+                            <p class="mt-2 text-slate-600 dark:text-slate-300" data-i18n="exp_bootcamp_desc">Menyelesaikan pelatihan intensif pembuatan prototipe interaktif dan riset pengguna.</p>
+                        </div>
+                        <div class="border-l-2 border-brand-500 pl-4 relative">
+                            <div class="absolute w-3 h-3 bg-brand-500 rounded-full -left-[7px] top-2"></div>
+                            <h4 class="font-bold text-lg">Mahasiswa S1 Sistem Informasi</h4>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Universitas Subang | Tingkat Akhir</p>
+                            <p class="mt-2 text-slate-600 dark:text-slate-300" data-i18n="exp_uni_desc">Fokus pada pengembangan perangkat lunak, sistem informasi, dan jaringan.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-20 relative z-10 reveal">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4" data-i18n="projects_title">Showcase Proyek</h2>
+                <div class="w-16 h-1 bg-brand-500 mx-auto rounded-full"></div>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex justify-center gap-4 mb-10 flex-wrap">
+                <button class="filter-btn active px-4 py-2 rounded-full glass font-medium text-brand-600 dark:text-brand-400 border-brand-500" data-filter="all" data-i18n="filter_all">Semua</button>
+                <button class="filter-btn px-4 py-2 rounded-full glass font-medium hover:text-brand-500 transition-colors" data-filter="web">Web Dev</button>
+                <button class="filter-btn px-4 py-2 rounded-full glass font-medium hover:text-brand-500 transition-colors" data-filter="network">Networking</button>
+                <button class="filter-btn px-4 py-2 rounded-full glass font-medium hover:text-brand-500 transition-colors" data-filter="network">Design Grafis</button>
+            </div>
+
+            <!-- Project Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Project 1: SiPera -->
+                <div class="project-item tilt-card glass rounded-2xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700" data-category="web">
+                    <img src="https://placehold.co/600x400/2563eb/ffffff?text=SiPera+Thumbnail" alt="SiPera" class="w-full h-48 object-cover">
+                    <div class="p-6 tilt-content">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold">SiPera</h3>
+                            <div class="flex gap-2">
+                                <a href="#" class="text-slate-400 hover:text-brand-500"><i class="fab fa-github"></i></a>
+                                <a href="#" class="text-slate-400 hover:text-brand-500"><i class="fas fa-external-link-alt"></i></a>
+                            </div>
+                        </div>
+                        <p class="text-sm text-brand-500 font-medium mb-2">[Laravel, Tailwind, JS, PHP]</p>
+                        <p class="text-slate-600 dark:text-slate-300 mb-4" data-i18n="proj_sipera_desc">Sistem Pengelolaan Rapat interaktif untuk memudahkan penjadwalan dan manajemen dokumen rapat institusi.</p>
+                    </div>
+                </div>
+
+                <!-- Project 2: e-Net -->
+                <div class="project-item tilt-card glass rounded-2xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700" data-category="network">
+                    <img src="https://placehold.co/600x400/10b981/ffffff?text=e-Net+Thumbnail" alt="e-Net" class="w-full h-48 object-cover">
+                    <div class="p-6 tilt-content">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold">e-Net</h3>
+                            <div class="flex gap-2">
+                                <a href="#" class="text-slate-400 hover:text-brand-500"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                        <p class="text-sm text-brand-500 font-medium mb-2">[Laravel, SNMP, Grafana]</p>
+                        <p class="text-slate-600 dark:text-slate-300 mb-4" data-i18n="proj_enet_desc">Aplikasi monitoring topologi jaringan dan status server secara realtime dengan notifikasi otomatis.</p>
+                    </div>
+                </div>
+
+                <!-- Project 3: Sidalaih-Pilkades -->
+                <div class="project-item tilt-card glass rounded-2xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700" data-category="web">
+                    <img src="https://placehold.co/600x400/f59e0b/ffffff?text=Sidalaih+Thumbnail" alt="Sidalaih-Pilkades" class="w-full h-48 object-cover">
+                    <div class="p-6 tilt-content">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold">Sidalaih-Pilkades</h3>
+                            <div class="flex gap-2">
+                                <a href="#" class="text-slate-400 hover:text-brand-500"><i class="fab fa-github"></i></a>
+                                <a href="#" class="text-slate-400 hover:text-brand-500"><i class="fas fa-external-link-alt"></i></a>
+                            </div>
+                        </div>
+                        <p class="text-sm text-brand-500 font-medium mb-2">[React, Node.js, MySQL]</p>
+                        <p class="text-slate-600 dark:text-slate-300 mb-4" data-i18n="proj_sidalaih_desc">Sistem Informasi Manajemen Pemilihan Kepala Desa yang mengelola data pemilih, kandidat, hingga rekapitulasi suara digital.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-20 relative z-10 reveal">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4" data-i18n="gallery_title">Galeri Foto</h2>
+                <div class="w-16 h-1 bg-brand-500 mx-auto rounded-full"></div>
+            </div>
+
+            <!-- Photo Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                <!-- Photo 1 -->
+                <div class="glass rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700 group cursor-pointer aspect-square relative">
+                    <img src="https://placehold.co/500x500/06b6d4/ffffff?text=Photo+1" alt="Gallery Photo 1" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                        <span class="text-white font-medium text-sm">Kegiatan NOC</span>
+                    </div>
+                </div>
+                
+                <!-- Photo 2 -->
+                <div class="glass rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700 group cursor-pointer aspect-square relative">
+                    <img src="https://placehold.co/500x500/8b5cf6/ffffff?text=Photo+2" alt="Gallery Photo 2" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                        <span class="text-white font-medium text-sm">Bootcamp UI/UX</span>
+                    </div>
+                </div>
+
+                <!-- Photo 3 -->
+                <div class="glass rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700 group cursor-pointer aspect-square relative">
+                    <img src="https://placehold.co/500x500/0891b2/ffffff?text=Photo+3" alt="Gallery Photo 3" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                        <span class="text-white font-medium text-sm">Seminar Kampus</span>
+                    </div>
+                </div>
+
+                <!-- Photo 4 -->
+                <div class="glass rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700 group cursor-pointer aspect-square relative">
+                    <img src="https://placehold.co/500x500/a855f7/ffffff?text=Photo+4" alt="Gallery Photo 4" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                        <span class="text-white font-medium text-sm">Tim Proyek</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section & Footer -->
+    <section id="contact" class="py-20 relative z-10 bg-slate-100 dark:bg-slate-900/50 mt-10 reveal">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4" data-i18n="contact_title">Mari Terhubung</h2>
+                <p class="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto" data-i18n="contact_subtitle">Tertarik untuk berkolaborasi atau memiliki tawaran pekerjaan? Jangan ragu untuk menghubungi saya.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-16">
+                <!-- Direct Contact Buttons -->
+                <div class="flex flex-col">
+                    <h3 class="text-xl font-semibold mb-6" data-i18n="contact_direct">Kontak Langsung</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Email -->
+                        <a href="mailto:emailkamu@gmail.com" class="flex items-center gap-3 px-5 py-4 glass rounded-xl hover:-translate-y-1 transition-transform border border-slate-200 dark:border-slate-700">
+                            <i class="fas fa-envelope text-brand-500 text-2xl w-8 text-center"></i>
+                            <span class="font-medium" data-i18n="contact_email">Email Saya</span>
+                        </a>
+                        <!-- WhatsApp -->
+                        <a href="https://wa.me/628XXXXXXXXXX" target="_blank" class="flex items-center gap-3 px-5 py-4 glass rounded-xl hover:-translate-y-1 transition-transform border border-slate-200 dark:border-slate-700">
+                            <i class="fab fa-whatsapp text-green-500 text-2xl w-8 text-center"></i>
+                            <span class="font-medium" data-i18n="contact_wa">WhatsApp</span>
+                        </a>
+                        <!-- LinkedIn -->
+                        <a href="https://linkedin.com/in/usernamekamu" target="_blank" class="flex items-center gap-3 px-5 py-4 glass rounded-xl hover:-translate-y-1 transition-transform border border-slate-200 dark:border-slate-700">
+                            <i class="fab fa-linkedin text-brand-500 text-2xl w-8 text-center"></i>
+                            <span class="font-medium">LinkedIn</span>
+                        </a>
+                        <!-- GitHub -->
+                        <a href="https://github.com/usernamekamu" target="_blank" class="flex items-center gap-3 px-5 py-4 glass rounded-xl hover:-translate-y-1 transition-transform border border-slate-200 dark:border-slate-700">
+                            <i class="fab fa-github text-brand-500 text-2xl w-8 text-center"></i>
+                            <span class="font-medium">GitHub</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="glass p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg">
+                    <h3 class="text-xl font-semibold mb-6" data-i18n="contact_form_title">Kirim Pesan</h3>
+                    <form id="contact-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300" data-i18n="form_name">Nama Lengkap</label>
+                            <input type="text" id="form-name" required class="w-full px-4 py-2.5 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100" placeholder="John Doe">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300" data-i18n="form_email">Alamat Email</label>
+                            <input type="email" id="form-email" required class="w-full px-4 py-2.5 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100" placeholder="john@example.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300" data-i18n="form_subject">Subjek / Perusahaan</label>
+                            <input type="text" id="form-subject" required class="w-full px-4 py-2.5 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100" placeholder="Tawaran Kerjasama / Rekrutmen">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300" data-i18n="form_message">Pesan Anda</label>
+                            <textarea id="form-message" rows="4" required class="w-full px-4 py-2.5 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-800 dark:text-slate-100 resize-none" placeholder="Tuliskan detail tawaran atau pesan Anda di sini..."></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                            <button type="button" id="btn-wa" class="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-medium py-3 rounded-lg transition-colors shadow-md flex justify-center items-center gap-2">
+                                <i class="fab fa-whatsapp text-lg"></i> <span data-i18n="form_submit_wa">Kirim via WA</span>
+                            </button>
+                            <button type="button" id="btn-email" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-3 rounded-lg transition-colors shadow-md flex justify-center items-center gap-2">
+                                <i class="fas fa-envelope text-lg"></i> <span data-i18n="form_submit_email">Kirim via Email</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-300 dark:border-slate-700 pt-8 text-center">
+                <p class="text-slate-500 text-sm">© 2026 Egi Fahmi Eriana. <span data-i18n="footer_text">Dibuat dengan Tailwind & Three.js</span>.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        /* =========================================
+           1. Theme Toggle Logic (Dark/Light)
+           ========================================= */
+        const themeBtn = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        
+        // Cek LocalStorage
+        if (localStorage.getItem('theme') === 'light') {
+            html.classList.remove('dark');
+        } else {
+            html.classList.add('dark'); // Default to dark as per request aesthetic
+        }
+
+        themeBtn.addEventListener('click', () => {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                updateThreeJsColor(0x0891b2); // update particles to Cyan in light mode
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                updateThreeJsColor(0xffffff); // update particles to white in dark mode
+            }
+        });
+
+        /* =========================================
+           2. Translation Logic (ID/EN)
+           ========================================= */
+        const dictionary = {
+            id: {
+                nav_about: "Tentang",
+                nav_certificates: "Sertifikat",
+                nav_projects: "Proyek",
+                nav_gallery: "Galeri",
+                nav_contact: "Kontak",
+                hero_role: "Frontend Developer | UI/UX Designer |\nNetwork Operating Center",
+                hero_bio: "Mahasiswa tingkat akhir yang bersemangat membangun solusi web interaktif dan desain yang user-friendly.",
+                btn_contact: "Hubungi Saya",
+                about_title: "Tentang & Keahlian",
+                skills_title: "Tech Stack / Keahlian",
+                exp_title: "Pengalaman & Sertifikasi",
+                exp_noc_desc: "Monitoring jaringan dan infrastruktur, troubleshooting, serta memastikan konektivitas berjalan optimal.",
+                exp_bootcamp_desc: "Menyelesaikan pelatihan intensif pembuatan prototipe interaktif dan riset pengguna.",
+                exp_uni_desc: "Fokus pada pengembangan perangkat lunak, sistem informasi, dan jaringan.",
+                projects_title: "Showcase Proyek",
+                gallery_title: "Galeri Foto",
+                filter_all: "Semua",
+                proj_sipera_desc: "Sistem Pengelolaan Rapat interaktif untuk memudahkan penjadwalan dan manajemen dokumen rapat institusi.",
+                proj_enet_desc: "Aplikasi monitoring topologi jaringan dan status server secara realtime dengan notifikasi otomatis.",
+                proj_sidalaih_desc: "Sistem Informasi Manajemen Pemilihan Kepala Desa yang mengelola data pemilih, kandidat, hingga rekapitulasi suara digital.",
+                contact_title: "Mari Terhubung",
+                contact_subtitle: "Tertarik untuk berkolaborasi atau memiliki tawaran pekerjaan? Jangan ragu untuk menghubungi saya.",
+                contact_direct: "Kontak Langsung",
+                contact_form_title: "Kirim Pesan",
+                form_name: "Nama Lengkap",
+                form_email: "Alamat Email",
+                form_subject: "Subjek / Perusahaan",
+                form_message: "Pesan Anda",
+                form_submit_wa: "Kirim via WA",
+                form_submit_email: "Kirim via Email",
+                contact_email: "Email Saya",
+                contact_wa: "WhatsApp",
+                footer_text: "Dibuat dengan Tailwind & Three.js"
+            },
+            en: {
+                nav_about: "About",
+                nav_certificates: "Certificates",
+                nav_projects: "Projects",
+                nav_gallery: "Gallery",
+                nav_contact: "Contact",
+                hero_role: "Frontend Developer | UI/UX Designer |\nNetwork Operating Center",
+                hero_bio: "A final-year student passionate about building interactive web solutions and user-friendly designs.",
+                btn_contact: "Contact Me",
+                about_title: "About & Skills",
+                skills_title: "Tech Stack / Skills",
+                exp_title: "Experience & Certifications",
+                exp_noc_desc: "Monitoring network and infrastructure, troubleshooting, and ensuring optimal connectivity.",
+                exp_bootcamp_desc: "Completed intensive training on interactive prototyping and user research.",
+                exp_uni_desc: "Focusing on software development, information systems, and computer networks.",
+                projects_title: "Project Showcase",
+                gallery_title: "Photo Gallery",
+                filter_all: "All",
+                proj_sipera_desc: "An interactive Meeting Management System to facilitate scheduling and document management.",
+                proj_enet_desc: "Real-time network topology and server status monitoring application with automated alerts.",
+                proj_sidalaih_desc: "Village Head Election Management Information System managing voter data, candidates, and digital vote recap.",
+                contact_title: "Let's Connect",
+                contact_subtitle: "Interested in collaborating or have a job offer? Feel free to reach out.",
+                contact_direct: "Direct Contact",
+                contact_form_title: "Send a Message",
+                form_name: "Full Name",
+                form_email: "Email Address",
+                form_subject: "Subject / Company",
+                form_message: "Your Message",
+                form_submit_wa: "Send via WA",
+                form_submit_email: "Send via Email",
+                contact_email: "My Email",
+                contact_wa: "WhatsApp",
+                footer_text: "Built with Tailwind & Three.js"
+            }
+        };
+
+        let currentLang = 'id';
+        const langToggle = document.getElementById('lang-toggle');
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            // Toggle button UI logic
+            if (lang === 'id') {
+                langToggle.innerHTML = '<span class="text-cyan-400">ID</span>/EN';
+            } else {
+                langToggle.innerHTML = 'ID/<span class="text-cyan-400">EN</span>';
+            }
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dictionary[lang][key]) {
+                    // Handle line breaks for role text
+                    if(key === 'hero_role') {
+                        el.innerHTML = dictionary[lang][key].replace(/\n/g, '<br class="hidden lg:block">');
+                    } else {
+                        el.textContent = dictionary[lang][key];
+                    }
+                }
+            });
+        }
+
+        langToggle.addEventListener('click', () => {
+            setLanguage(currentLang === 'id' ? 'en' : 'id');
+        });
+
+        // Initialize Language and Typing Effect on Load
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage('id'); 
+        });
+
+        /* =========================================
+           3. Mobile Menu Toggle
+           ========================================= */
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        /* =========================================
+           4. Project Filter Logic
+           ========================================= */
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const projectItems = document.querySelectorAll('.project-item');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update active state
+                filterBtns.forEach(b => {
+                    b.classList.remove('text-brand-600', 'dark:text-brand-400', 'border-brand-500');
+                    b.classList.add('hover:text-brand-500');
+                });
+                btn.classList.add('text-brand-600', 'dark:text-brand-400', 'border-brand-500');
+                btn.classList.remove('hover:text-brand-500');
+
+                const filterValue = btn.getAttribute('data-filter');
+
+                projectItems.forEach(item => {
+                    if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
+                        item.style.display = 'block';
+                        // Add slight animation
+                        item.style.animation = 'fadeIn 0.5s ease forwards';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        /* =========================================
+           5. 3D Tilt Effect (Vanilla JS)
+           ========================================= */
+        const tiltCards = document.querySelectorAll('.tilt-card');
+
+        tiltCards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // Calculate rotation based on cursor position relative to center
+                const xPct = (x / rect.width) - 0.5;
+                const yPct = (y / rect.height) - 0.5;
+                
+                // Max rotation degrees
+                const maxRotate = 15;
+                
+                card.style.transform = `perspective(1000px) rotateY(${xPct * maxRotate}deg) rotateX(${-yPct * maxRotate}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1, 1, 1)`;
+            });
+        });
+
+        /* =========================================
+           6. Three.js Interactive Background (Matching Reference)
+           ========================================= */
+        let scene, camera, renderer, particles, torusKnot1, torusKnot2;
+        let mouseX = 0, mouseY = 0;
+        let windowHalfX = window.innerWidth / 2;
+        let windowHalfY = window.innerHeight / 2;
+
+        function createCircleTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.beginPath();
+            ctx.arc(32, 32, 28, 0, Math.PI * 2);
+            ctx.fillStyle = "white";
+            ctx.fill();
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            // Menyesuaikan sudut pandang kamera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 3000);
+            camera.position.z = 800;
+
+            const isDark = html.classList.contains('dark');
+            const particleColor = isDark ? 0xffffff : 0x0891b2;
+            
+            const circleTexture = createCircleTexture();
+
+            const baseMaterial = new THREE.PointsMaterial({
+                size: 3.5,
+                transparent: true,
+                opacity: 0.8,
+                map: circleTexture,
+                alphaTest: 0.1,
+                sizeAttenuation: true
+            });
+
+            // 1. Ambient Background Dust
+            const dustGeometry = new THREE.BufferGeometry();
+            const dustCount = 800;
+            const dustPos = new Float32Array(dustCount * 3);
+            for(let i = 0; i < dustCount * 3; i++) {
+                dustPos[i] = (Math.random() - 0.5) * 3000; 
+            }
+            dustGeometry.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+            
+            const dustMat = baseMaterial.clone();
+            dustMat.color.setHex(particleColor);
+            dustMat.size = 2;
+            dustMat.opacity = 0.3;
+            
+            particles = new THREE.Points(dustGeometry, dustMat);
+            scene.add(particles);
+
+            // 2. Torus Knot 1 (Cyan - Left Bottom)
+            const knot1Geometry = new THREE.TorusKnotGeometry(160, 45, 150, 25);
+            const mat1 = baseMaterial.clone();
+            mat1.color.setHex(0x06b6d4); // Cyan
+            
+            torusKnot1 = new THREE.Points(knot1Geometry, mat1);
+            torusKnot1.position.set(-400, -250, -200);
+            scene.add(torusKnot1);
+
+            // 3. Torus Knot 2 (Purple - Right Middle)
+            const knot2Geometry = new THREE.TorusKnotGeometry(200, 60, 180, 30);
+            const mat2 = baseMaterial.clone();
+            mat2.color.setHex(0xa855f7); // Purple
+            
+            torusKnot2 = new THREE.Points(knot2Geometry, mat2);
+            torusKnot2.position.set(450, 50, -300);
+            scene.add(torusKnot2);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Event Listeners for mouse interaction & resize
+            document.addEventListener('mousemove', onDocumentMouseMove);
+            window.addEventListener('resize', onWindowResize);
+
+            animateThreeJS();
+        }
+
+        function updateThreeJsColor(hexColor) {
+            if (particles) {
+                particles.material.color.setHex(hexColor);
+            }
+            // Torus knots keep their cyan/purple branding colors regardless of theme for aesthetic
+        }
+
+        function onWindowResize() {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onDocumentMouseMove(event) {
+            mouseX = event.clientX - windowHalfX;
+            mouseY = event.clientY - windowHalfY;
+        }
+
+        function animateThreeJS() {
+            requestAnimationFrame(animateThreeJS);
+            
+            camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY * 0.5 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+            
+            particles.rotation.x += 0.0003;
+            particles.rotation.y += 0.0005;
+
+            if (torusKnot1) {
+                torusKnot1.rotation.x -= 0.001;
+                torusKnot1.rotation.y += 0.002;
+            }
+            if (torusKnot2) {
+                torusKnot2.rotation.x += 0.002;
+                torusKnot2.rotation.y -= 0.001;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Initialize 3D bg when window loads
+        window.onload = function() {
+            initThreeJS();
+        };
+
+        /* =========================================
+           8. Scroll Reveal Observer
+           ========================================= */
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealOptions = {
+            threshold: 0.15,
+            rootMargin: "0px 0px -50px 0px"
+        };
+        
+        const revealOnScroll = new IntersectionObserver(function(entries, observer) {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('active');
+                observer.unobserve(entry.target); // Hanya animasi sekali
+            });
+        }, revealOptions);
+
+        revealElements.forEach(el => {
+            revealOnScroll.observe(el);
+        });
+
+        // Custom Keyframe for project filter animation
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        /* =========================================
+           7. Form Action Logic (WA & Email)
+           ========================================= */
+        const contactForm = document.getElementById('contact-form');
+        const btnWa = document.getElementById('btn-wa');
+        const btnEmail = document.getElementById('btn-email');
+
+        function getFormData() {
+            return {
+                name: document.getElementById('form-name').value,
+                email: document.getElementById('form-email').value,
+                subject: document.getElementById('form-subject').value,
+                message: document.getElementById('form-message').value
+            };
+        }
+
+        if(contactForm && btnWa && btnEmail) {
+            
+            // Action Kirim via WhatsApp
+            btnWa.addEventListener('click', function() {
+                if(!contactForm.checkValidity()) {
+                    contactForm.reportValidity(); // Memunculkan tooltip wajib isi HTML5
+                    return;
+                }
+                const data = getFormData();
+                
+                // Ganti dengan nomor WhatsApp aktif Anda (Gunakan awalan 62)
+                const waNumber = "628XXXXXXXXXX"; 
+                const waText = `Halo Egi, saya ${data.name} (${data.email}).\n\n*Subjek:* ${data.subject}\n\n*Pesan:*\n${data.message}`;
+                const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(waText)}`;
+                
+                window.open(waUrl, '_blank');
+            });
+
+            // Action Kirim via Email
+            btnEmail.addEventListener('click', function() {
+                if(!contactForm.checkValidity()) {
+                    contactForm.reportValidity(); // Memunculkan tooltip wajib isi HTML5
+                    return;
+                }
+                const data = getFormData();
+                
+                // Ganti dengan email asli Anda
+                const myEmail = "emailkamu@gmail.com"; 
+                const mailBody = `Halo Egi,\n\nSaya ${data.name} (${data.email}).\n\n${data.message}`;
+                const mailToUrl = `mailto:${myEmail}?subject=${encodeURIComponent(data.subject)}&body=${encodeURIComponent(mailBody)}`;
+                
+                window.location.href = mailToUrl;
+            });
+            
+            // Cegah reload form default jika menekan tombol Enter
+            contactForm.addEventListener('submit', (e) => e.preventDefault());
+        }
+
+    </script>
+</body>
+</html>
